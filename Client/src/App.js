@@ -16,18 +16,42 @@ function App() {
    const [characters, setCharacters] = useState([]);
    const [access, setAccess] = useState(false)
    const navigate = useNavigate();
-   let EMAIL = 'dmroa@gmail.com';
-   let PASSWORD = '0226abc'
-   
 
-   function onSearch(id) {
-      axios(`https://rickandmortyapi.com/api/character/${id}`).then(({ data }) => {
+   useEffect(() => {
+      !access && navigate('/');
+   }, [access, navigate]);
+   
+   const URL = 'http://localhost:3001/rickandmorty/';
+   
+   const login = async (userData) => {
+      const { email, password } = userData;
+      try {
+         const { data } = await axios (URL + `login?email=${email}&password=${password}`)
+         const { access } = data;
+
+         setAccess(access);
+         access && navigate('/home');
+
+      } catch (error) {
+         console.log(error.message);
+         
+      }      
+   }
+
+   function logout() {
+      setAccess(false);
+      navigate('/');
+    }
+   
+   const onSearch = async (id) => {
+      try {
+         const { data } = await axios(`http://localhost:3001/rickandmorty/character/${id}`)
          if (data.name) {
-            setCharacters((oldChars) => [...oldChars, data]);
-         } else {
-            window.alert('¡No hay personajes con este ID!');
-         }
-      });
+               setCharacters((oldChars) => [...oldChars, data])}
+
+      } catch (error) {
+         alert('¡No hay personajes con este ID!');
+      }  
    }
    
    const onClose = (id) => {
@@ -37,30 +61,9 @@ function App() {
          setCharacters (charactersFiltered)
    }
 
-   function random() {
-      let randomId = Math.floor(Math.random() * 826);
-      console.log(randomId);
-      onSearch(randomId);
-    }
-
-    const login = (userData) => {
-      if (userData.password === PASSWORD && userData.email === EMAIL) {
-         setAccess(true);
-         navigate('/home');
-      }
-    }
-
-    useEffect(() => {
-      !access && navigate('/');
-      }, [access]);
-
    return (
       <div className='App'>
-         {
-            location.pathname !== '/'
-            ? <Nav onSearch = {onSearch} random = {random} 
-            setAccess = {setAccess} /> : null
-         }
+            {location.pathname !== '/' && <Nav onSearch = {onSearch} logout = {logout} />}
          
          <Routes>
             <Route path= '/home' element = {<Cards characters={characters} onClose = {onClose}/>}/>
@@ -69,9 +72,7 @@ function App() {
             <Route path="*" element={<Error />}/>
             <Route path='/' element={<Form login={login}/>} />
             <Route path='/favorites' element={<Favorites/>} />
-         </Routes>
-
-        
+         </Routes>        
       </div>
    );
 }

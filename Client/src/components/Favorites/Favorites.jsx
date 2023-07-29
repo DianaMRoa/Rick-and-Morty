@@ -46,7 +46,7 @@ const Favorites = ({ myFavorites }) => {
                     species = {fav.species}
                     gender = {fav.gender}
                     image = {fav.image}
-                    origin = {fav.origin.name}
+                    origin = {fav.origin?.name}
                     onClose={fav.onClose}
                     />
                 )
